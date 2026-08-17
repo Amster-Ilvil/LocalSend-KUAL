@@ -87,11 +87,6 @@ CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 \
 
 生成的运行包不需要 Go、动态库或源码。
 
-## 已冻结的双平台核心
-
-`FROZEN_CORE_SHA256.txt` 记录了已经完成实机双平台验证的核心源码 SHA-256。`go test ./...` 中的冻结校验会在核心文件被意外修改时失败。
-
-冻结范围包括接收服务、macOS framing 兼容、发送客户端、发现、防火墙和设备身份相关核心。这样后续稳定性优化不会无意破坏已经验证成功的 Windows/macOS 传输行为。
 
 
 
