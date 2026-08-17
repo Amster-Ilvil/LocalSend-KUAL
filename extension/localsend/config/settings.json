@@ -1,0 +1,14 @@
+{
+  "alias": "Kindle Voyage KUAL",
+  "port": 53317,
+  "encryption": false,
+  "auto_accept": true,
+  "verify_checksums": true,
+  "pin": "",
+  "send_pin": "",
+  "receive_dir": "/mnt/us/documents",
+  "outbox_dir": "/mnt/us/LocalSend/Outbox",
+  "interface": "wlan0",
+  "announce_seconds": 30,
+  "max_peers": 12
+}

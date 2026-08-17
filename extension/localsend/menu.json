@@ -1,0 +1,81 @@
+{
+  "items": [
+    {
+      "items": [
+        {
+          "action": "./bin/kual.sh",
+          "exitmenu": false,
+          "name": "状态",
+          "params": "status",
+          "priority": 1
+        },
+        {
+          "action": "./bin/kual.sh",
+          "exitmenu": false,
+          "name": "启动接收（持续）",
+          "params": "start 0",
+          "priority": 2
+        },
+        {
+          "action": "./bin/kual.sh",
+          "exitmenu": false,
+          "name": "接收 10 分钟",
+          "params": "start 10",
+          "priority": 3
+        },
+        {
+          "action": "./bin/kual.sh",
+          "exitmenu": false,
+          "name": "接收 30 分钟",
+          "params": "start 30",
+          "priority": 4
+        },
+        {
+          "action": "./bin/kual.sh",
+          "exitmenu": false,
+          "name": "停止 LocalSend",
+          "params": "stop",
+          "priority": 5
+        },
+        {
+          "action": "./bin/kual.sh",
+          "exitmenu": false,
+          "name": "发现 / 刷新设备",
+          "params": "refresh",
+          "priority": 6,
+          "refresh": true
+        },
+        {
+          "items": [
+            {
+              "action": "./bin/kual.sh",
+              "exitmenu": false,
+              "name": "暂无设备（先点“发现 / 刷新设备”）",
+              "params": "refresh",
+              "priority": 1,
+              "refresh": true
+            }
+          ],
+          "name": "发送 Outbox",
+          "priority": 7
+        },
+        {
+          "action": "./bin/kual.sh",
+          "exitmenu": false,
+          "name": "网络诊断",
+          "params": "diagnose",
+          "priority": 8
+        },
+        {
+          "action": "./bin/kual.sh",
+          "exitmenu": false,
+          "name": "使用说明",
+          "params": "help",
+          "priority": 9
+        }
+      ],
+      "name": "LocalSend",
+      "priority": 1
+    }
+  ]
+}

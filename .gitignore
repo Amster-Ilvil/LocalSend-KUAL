@@ -1,0 +1,35 @@
+# Build output
+/build/
+extension/localsend/bin/localsend-kindle
+*.zip
+*.tar
+*.tar.gz
+
+# Runtime state: never commit
+extension/localsend/state/
+extension/localsend/logs/
+**/state/device.crt
+**/state/device.key
+**/state/http-fingerprint
+**/state/peers.json
+**/state/status.json
+**/state/daemon.pid
+**/state/daemon.lock
+*.crt
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Transfer/runtime leftovers
+*.localsend-part
+*.localsend-part-*
+*.log
+*.log.1
+
+# Local environment
+.DS_Store
+.idea/
+.vscode/
+.env
+.env.*
