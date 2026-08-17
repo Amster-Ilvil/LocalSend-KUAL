@@ -61,27 +61,6 @@ extensions/
 /mnt/us/documents
 ```
 
-## 配置与隐私
-
-`extension/localsend/config/settings.json` **不会提交到 Git 仓库**。程序首次运行时会自动生成安全默认配置，因此源码仓库和升级包都不需要携带用户配置。
-
-运行时还会在 Kindle 本地生成以下内容：
-
-```text
-extension/localsend/config/settings.json
-extension/localsend/state/device.crt
-extension/localsend/state/device.key
-extension/localsend/state/http-fingerprint
-extension/localsend/state/peers.json
-extension/localsend/state/status.json
-extension/localsend/state/daemon.pid
-extension/localsend/state/daemon.lock
-extension/localsend/logs/localsend.log
-```
-
-这些文件可能包含设备身份、PIN、局域网 peer 信息或运行日志，均已加入 `.gitignore`，**不要提交到公开仓库**。
-
-本项目本身不包含遥测、云端上传或账号系统；LocalSend-KUAL 只在局域网中工作。
 
 ## 构建
 
@@ -111,16 +90,7 @@ CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 \
 
 冻结范围包括接收服务、macOS framing 兼容、发送客户端、发现、防火墙和设备身份相关核心。这样后续稳定性优化不会无意破坏已经验证成功的 Windows/macOS 传输行为。
 
-## 仓库内容原则
 
-公开仓库只保留：
-
-- 程序源码；
-- KUAL 必需的脚本和菜单元数据；
-- 自动化测试与冻结核心校验；
-- README、`.gitignore`、`go.mod` 和许可证。
-
-不提交构建产物、发布 ZIP、运行日志、设备证书、私钥、peer 状态、PID、用户配置和内部开发过程记录。
 
 ## 与 LocalSend 的关系
 
