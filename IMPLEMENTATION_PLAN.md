@@ -1,22 +1,30 @@
-# v0.1.8 stability policy
+# v0.1.8 stability-hardening plan
 
-v0.1.8 treats the validated v0.1.7 dual-platform transfer core as frozen.
+## Non-negotiable freeze
 
-## Frozen behavior
+Treat the real-device-successful v0.1.7 transfer implementation as immutable. The frozen files are listed in `FROZEN_CORE_SHA256.txt` and guarded by an automated SHA-256 test.
 
-1. Preserve the Windows v2.1 fixed-Content-Length receive path.
-2. Preserve the v2.2 streaming framing normalization path used by macOS.
-3. Preserve LocalSend HTTP port 53317 and direct `/mnt/us/documents` receive behavior.
-4. Preserve runtime-only firewall management.
-5. Preserve current LocalSend identity and HTTPS/mTLS outbound semantics.
+No changes are permitted in this release to:
 
-## Allowed hardening work
+- Windows v2.1 fixed-length upload behavior.
+- macOS v2.2 framing normalizer.
+- LocalSend endpoint semantics.
+- HTTP port 53317 compatibility mode.
+- temporary firewall lease implementation.
+- outbound HTTPS/mTLS identity and certificate validation.
 
-- daemon lifecycle and single-instance protection;
-- crash recovery and stale temporary-file cleanup;
-- logging bounds and diagnostics;
-- storage checks;
-- peer-state write throttling;
-- regression tests and frozen-core integrity checks.
+## Allowed hardening layer
 
-Any future protocol-core change should intentionally update `FROZEN_CORE_SHA256.txt` and repeat the cross-platform validation matrix before release.
+Changes are limited to process lifecycle, log lifecycle, crash residue cleanup, diagnostics and state persistence write reduction.
+
+## Release gates
+
+- Frozen core SHA-256 check.
+- Full Go tests and `go vet`.
+- Targeted race tests for dual-platform and hardening paths.
+- Final executable cross-platform sequence: Windows -> macOS chunked -> Windows -> macOS raw.
+- Byte-for-byte and SHA-256 comparison for every received file.
+- Real second-daemon rejection and stale partial cleanup smoke test.
+- KUAL shell syntax and JSON validation.
+- ARMv7 ELF32 / EABI5 / statically linked / no dynamic section verification.
+- Install archive audit: no settings, identities, peer state, PID or logs.
