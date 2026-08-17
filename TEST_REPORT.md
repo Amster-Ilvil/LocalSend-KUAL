@@ -1,24 +1,61 @@
-# LocalSend-KUAL v0.1.8 validation summary
+# LocalSend-KUAL v0.1.8 test report
 
-The release keeps the validated v0.1.7 transfer core byte-for-byte frozen and adds only lifecycle/stability hardening around it.
+v0.1.8 is a stability wrapper over the frozen v0.1.7 transfer core.
 
-## Release gates
+## Frozen core integrity
+
+`sha256sum -c FROZEN_CORE_SHA256.txt`: PASS
+
+Frozen files:
+
+- internal/app/server.go
+- internal/app/upload_compat.go
+- internal/app/client.go
+- internal/app/discovery.go
+- internal/app/firewall.go
+- internal/app/identity.go
+- internal/app/http_identity.go
+- internal/app/types.go
+
+## Automated validation
 
 - `go test ./...`: PASS
 - `go vet ./...`: PASS
-- targeted race tests for transfer/hardening paths: PASS
-- frozen dual-platform core SHA-256 check: PASS
-- Windows v2.1 fixed Content-Length receive: PASS
-- v2.2 missing Content-Length + missing Transfer-Encoding + chunked stream: PASS
-- v2.2 missing Content-Length + missing Transfer-Encoding + raw stream: PASS
-- Windows → v2.2 stream → Windows → v2.2 stream cross-platform sequence: PASS
-- byte-for-byte payload verification: PASS
-- stale daemon lock recovery: PASS
-- second-daemon rejection: PASS
-- interrupted-transfer temporary-file cleanup: PASS
-- normal EPUB preservation during cleanup: PASS
-- bounded log rotation: PASS
-- KUAL shell syntax: PASS
-- ARMv7 build: ELF32 ARM EABI5, statically linked, no dynamic section: PASS
+- targeted `go test -race` covering dual-platform compatibility, mTLS, daemon lock, partial cleanup, log rotation and state throttling: PASS
+- `sh -n extension/localsend/bin/kual.sh`: PASS
+- `python3 -m json.tool extension/localsend/menu.json`: PASS
 
-Hardware/client behavior can vary by Kindle firmware and LocalSend version; test new protocol-core changes on real devices before updating the frozen baseline.
+## Final executable cross-platform smoke
+
+One final compiled daemon process received, in order:
+
+1. Windows v2.1 fixed Content-Length: 67,848 bytes — byte compare PASS.
+2. macOS v2.2 missing CL/TE, actual chunked stream: 134,804 bytes — byte compare PASS.
+3. Windows v2.1 fixed Content-Length: 178,017 bytes — byte compare PASS.
+4. macOS v2.2 missing CL/TE, raw stream: 313,177 bytes — byte compare PASS.
+
+All four returned HTTP 200 and matched expected SHA-256 values.
+
+Result: `CROSS_PLATFORM_SMOKE=PASS`.
+
+## Hardening smoke
+
+- First daemon starts normally: PASS.
+- Second daemon is rejected with a non-zero exit code: PASS.
+- Stale `.localsend-part` file is removed on startup: PASS.
+- Normal EPUB beside it is preserved: PASS.
+- `daemon.lock` is released after clean stop: PASS.
+
+Result: `HARDENING_SMOKE=PASS`.
+
+## ARM build
+
+- Go: 1.23.x toolchain used by this environment.
+- GOOS=linux
+- GOARCH=arm
+- GOARM=7
+- CGO_ENABLED=0
+- ELF32 little-endian ARM
+- EABI5
+- statically linked
+- no dynamic section
