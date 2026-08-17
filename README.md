@@ -1,6 +1,6 @@
 # LocalSend-KUAL
 
-面向 **Kindle Voyage + KUAL** 的轻量 LocalSend 兼容实现，让旧 Kindle 可以在局域网内与 Windows、macOS 等 LocalSend 客户端互传文件，而不需要在 Kindle 上运行 Flutter 图形界面。
+面向 **Kindle Voyage + KUAL** 的轻量 LocalSend 兼容实现，让旧 Kindle 可以在局域网内与 Windows、macOS、iOS/iPadOS 等 LocalSend 客户端互传文件，而不需要在 Kindle 上运行 Flutter 图形界面。
 
 > 当前版本：**v0.1.8**  
 > v0.1.8 是稳定性加固层；已验证成功的 Windows/macOS 传输核心保持 v0.1.7 字节级冻结。
@@ -10,6 +10,7 @@
 - 兼容 LocalSend v2.2 的设备发现、注册、准备上传、上传与取消流程。
 - Windows v2.1 固定 `Content-Length` 上传兼容。
 - macOS v2.2 流式上传兼容，包括缺少 `Content-Length` / `Transfer-Encoding` 的特殊 framing。
+- 支持与 iPhone / iPad 上的 LocalSend 客户端互传文件（iOS / iPadOS，按标准 LocalSend v2 协议兼容）。
 - 文件直接接收到 `/mnt/us/documents`。
 - 支持从 Kindle 的 Outbox 向已发现设备发送文件。
 - KUAL 菜单控制：启动接收、定时接收、停止、发现设备、发送 Outbox、网络诊断。
@@ -21,6 +22,8 @@
 ## 兼容性说明
 
 项目主要针对 **Kindle Voyage 上的 KUAL 环境**。其它 Kindle 型号可能可以运行，但未做同等程度的实机验证。
+
+Windows 与 macOS 已完成实际 Voyage 双平台验证。iPhone / iPad 上的 LocalSend 客户端使用相同的 LocalSend v2 协议，因此也支持 iOS / iPadOS 端互传；目前尚未做与 Windows/macOS 同等程度的 Voyage 实机回归测试。
 
 当前接收服务默认使用：
 
@@ -53,7 +56,7 @@ extensions/
 2. 将发布 ZIP 解压到 Kindle USB 根目录并覆盖扩展文件。
 3. 断开 USB 后打开 KUAL。
 4. 选择 `LocalSend → 接收 10 分钟`、`接收 30 分钟`或持续接收。
-5. Windows/macOS 与 Kindle 保持在同一局域网，然后在 LocalSend 中选择 Kindle 设备发送文件。
+5. Windows、macOS、iPhone 或 iPad 与 Kindle 保持在同一局域网，然后在 LocalSend 中选择 Kindle 设备发送文件。
 
 收到的文件会直接保存到：
 
