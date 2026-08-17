@@ -1,9 +1,12 @@
-# Build output
+# Build outputs / release archives
 /build/
 extension/localsend/bin/localsend-kindle
 *.zip
 *.tar
 *.tar.gz
+
+# Local runtime configuration (generated automatically on first run)
+extension/localsend/config/settings.json
 
 # Runtime state: never commit
 extension/localsend/state/
@@ -27,9 +30,9 @@ extension/localsend/logs/
 *.log
 *.log.1
 
-# Local environment
+# Local secrets / editor files
+.env
+.env.*
 .DS_Store
 .idea/
 .vscode/
-.env
-.env.*
