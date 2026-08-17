@@ -1,48 +1,135 @@
-# LocalSend-KUAL v0.1.8 for Kindle Voyage
+# LocalSend-KUAL
 
-v0.1.8 is a stability-only wrapper release around the **frozen v0.1.7 dual-platform transfer core**.
+面向 **Kindle Voyage + KUAL** 的轻量 LocalSend 兼容实现，让旧 Kindle 可以在局域网内与 Windows、macOS 等 LocalSend 客户端互传文件，而不需要在 Kindle 上运行 Flutter 图形界面。
 
-The following behavior is intentionally unchanged from the version verified on the real Voyage:
+> 当前版本：**v0.1.8**  
+> v0.1.8 是稳定性加固层；已验证成功的 Windows/macOS 传输核心保持 v0.1.7 字节级冻结。
 
-- LocalSend v2.2 receiver over HTTP on port 53317.
-- Temporary runtime-only wlan0 firewall lease; removed on stop.
-- Receive directly into `/mnt/us/documents`.
-- Windows v2.1 fixed-Content-Length upload path.
-- macOS v2.2 missing-Content-Length / missing-Transfer-Encoding normalization.
-- HTTPS/mTLS outbound client behavior and certificate fingerprint identity.
-- Session/token/IP validation and existing transfer semantics.
+## 功能
 
-## Frozen core
+- 兼容 LocalSend v2.2 的设备发现、注册、准备上传、上传与取消流程。
+- Windows v2.1 固定 `Content-Length` 上传兼容。
+- macOS v2.2 流式上传兼容，包括缺少 `Content-Length` / `Transfer-Encoding` 的特殊 framing。
+- 文件直接接收到 `/mnt/us/documents`。
+- 支持从 Kindle 的 Outbox 向已发现设备发送文件。
+- KUAL 菜单控制：启动接收、定时接收、停止、发现设备、发送 Outbox、网络诊断。
+- 运行时临时开放 `wlan0` 的 53317 端口；停止后自动清理防火墙规则。
+- SHA-256 校验、会话/token/IP 校验、路径穿越保护与临时文件原子落盘。
+- 单实例保护、崩溃残留清理、日志轮转、存储空间诊断和 peer 状态写入节流。
+- 自签名设备身份，用于与 HTTPS LocalSend peer 通信时的 mTLS / fingerprint 校验。
 
-`FROZEN_CORE_SHA256.txt` records SHA-256 hashes of the eight source files that implement the successful v0.1.7 Windows/macOS transfer core. `go test ./...` includes `TestFrozenDualPlatformCoreV017`, which fails if any of those files change.
+## 兼容性说明
 
-For this reason the internal core startup line still says `v0.1.7`; v0.1.8 adds an immediately preceding line identifying the stability wrapper.
+项目主要针对 **Kindle Voyage 上的 KUAL 环境**。其它 Kindle 型号可能可以运行，但未做同等程度的实机验证。
 
-## v0.1.8 hardening
+当前接收服务默认使用：
 
-- Separate singleton `daemon.lock` prevents two serve commands racing before `daemon.pid` is created.
-- Stale daemon locks are recovered automatically; live LocalSend processes are never replaced.
-- Startup removes only LocalSend-owned `.localsend-part` temporary files left by an interrupted transfer.
-- Runtime log is capped at ~1 MiB with one backup (`localsend.log.1`).
-- KUAL also rotates an oversized log before starting the binary.
-- KUAL startup waits for the full self-test instead of assuming a fixed two-second startup is enough.
-- If startup self-test fails, the daemon is stopped and temporary firewall rules are cleaned up.
-- PID checks verify `/proc/<pid>/cmdline` contains `localsend-kindle`, reducing stale/reused PID false positives.
-- Network diagnostics now include free storage and keep a 16 MiB safety threshold.
-- Repeated identical peer announcements update LastSeen in memory without rewriting `peers.json` every 30 seconds. New/changed IP, protocol, port or metadata are persisted immediately; unchanged peers are checkpointed periodically.
+- 协议：HTTP（局域网兼容模式）
+- LocalSend 协议版本：2.2
+- 端口：53317
+- 网络接口：`wlan0`
+- 接收目录：`/mnt/us/documents`
+- Outbox：`/mnt/us/LocalSend/Outbox`
 
-## Install
+由于 Kindle 接收端使用 HTTP，请只在可信任的局域网中使用。不要把 53317 端口暴露到公网。
 
-1. In KUAL: `LocalSend -> Stop LocalSend`.
-2. Extract the install ZIP to the Kindle USB root and overwrite the extension files.
-3. Start `LocalSend -> Receive 10 minutes` or continuous receive.
+## 安装
 
-The install ZIP deliberately does **not** contain `config/settings.json`, identity files, peer state, PID files or logs, so an upgrade preserves the already-working configuration and device identity.
+发布包的目录结构应为：
 
-## Receive directory
+```text
+extensions/
+└── localsend/
+    ├── bin/
+    │   ├── kual.sh
+    │   └── localsend-kindle
+    ├── config.xml
+    └── menu.json
+```
 
-Files are saved directly under:
+安装步骤：
 
-`/mnt/us/documents`
+1. 如果旧版本正在运行，在 KUAL 中选择 `LocalSend → 停止 LocalSend`。
+2. 将发布 ZIP 解压到 Kindle USB 根目录并覆盖扩展文件。
+3. 断开 USB 后打开 KUAL。
+4. 选择 `LocalSend → 接收 10 分钟`、`接收 30 分钟`或持续接收。
+5. Windows/macOS 与 Kindle 保持在同一局域网，然后在 LocalSend 中选择 Kindle 设备发送文件。
 
-Kindle-supported book formats can therefore be indexed by the stock library.
+收到的文件会直接保存到：
+
+```text
+/mnt/us/documents
+```
+
+## 配置与隐私
+
+`extension/localsend/config/settings.json` **不会提交到 Git 仓库**。程序首次运行时会自动生成安全默认配置，因此源码仓库和升级包都不需要携带用户配置。
+
+运行时还会在 Kindle 本地生成以下内容：
+
+```text
+extension/localsend/config/settings.json
+extension/localsend/state/device.crt
+extension/localsend/state/device.key
+extension/localsend/state/http-fingerprint
+extension/localsend/state/peers.json
+extension/localsend/state/status.json
+extension/localsend/state/daemon.pid
+extension/localsend/state/daemon.lock
+extension/localsend/logs/localsend.log
+```
+
+这些文件可能包含设备身份、PIN、局域网 peer 信息或运行日志，均已加入 `.gitignore`，**不要提交到公开仓库**。
+
+本项目本身不包含遥测、云端上传或账号系统；LocalSend-KUAL 只在局域网中工作。
+
+## 构建
+
+需要 Go 1.23 或兼容版本。
+
+运行测试：
+
+```bash
+go test ./...
+go vet ./...
+```
+
+构建 Voyage ARMv7 静态二进制：
+
+```bash
+CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 \
+  go build -trimpath -ldflags='-s -w' \
+  -o extension/localsend/bin/localsend-kindle \
+  ./cmd/localsend-kindle
+```
+
+生成的运行包不需要 Go、动态库或源码。
+
+## 已冻结的双平台核心
+
+`FROZEN_CORE_SHA256.txt` 记录了已经完成实机双平台验证的核心源码 SHA-256。`go test ./...` 中的冻结校验会在核心文件被意外修改时失败。
+
+冻结范围包括接收服务、macOS framing 兼容、发送客户端、发现、防火墙和设备身份相关核心。这样后续稳定性优化不会无意破坏已经验证成功的 Windows/macOS 传输行为。
+
+## 仓库内容原则
+
+公开仓库只保留：
+
+- 程序源码；
+- KUAL 必需的脚本和菜单元数据；
+- 自动化测试与冻结核心校验；
+- README、`.gitignore`、`go.mod` 和许可证。
+
+不提交构建产物、发布 ZIP、运行日志、设备证书、私钥、peer 状态、PID、用户配置和内部开发过程记录。
+
+## 与 LocalSend 的关系
+
+本项目是面向 Kindle/KUAL 的第三方兼容实现，不是 LocalSend 官方客户端，也不隶属于 Amazon。
+
+LocalSend 官方项目：<https://github.com/localsend/localsend>
+
+## 许可证
+
+本项目采用 **MIT License**，详见 [LICENSE](LICENSE)。
+
+LocalSend 名称、上游项目以及其它第三方内容的权利归各自权利人所有。
