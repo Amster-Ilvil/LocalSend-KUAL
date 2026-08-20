@@ -60,18 +60,54 @@
           "priority": 7
         },
         {
+          "items": [
+            {
+              "action": "./bin/kual.sh",
+              "exitmenu": false,
+              "name": "刷新 ZIP 列表",
+              "params": "install-refresh",
+              "priority": 1,
+              "refresh": true
+            },
+            {
+              "action": "./bin/kual.sh",
+              "exitmenu": false,
+              "name": "暂无 ZIP（发送后点刷新）",
+              "params": "install-refresh",
+              "priority": 2,
+              "refresh": true
+            },
+            {
+              "action": "./bin/kual.sh",
+              "exitmenu": false,
+              "name": "确认安装已选 ZIP",
+              "params": "install-confirm",
+              "priority": 20
+            },
+            {
+              "action": "./bin/kual.sh",
+              "exitmenu": false,
+              "name": "取消待安装 ZIP",
+              "params": "install-cancel",
+              "priority": 21
+            }
+          ],
+          "name": "安装 ZIP 到 Kindle 根目录",
+          "priority": 8
+        },
+        {
           "action": "./bin/kual.sh",
           "exitmenu": false,
           "name": "网络诊断",
           "params": "diagnose",
-          "priority": 8
+          "priority": 9
         },
         {
           "action": "./bin/kual.sh",
           "exitmenu": false,
           "name": "使用说明",
           "params": "help",
-          "priority": 9
+          "priority": 10
         }
       ],
       "name": "LocalSend",
