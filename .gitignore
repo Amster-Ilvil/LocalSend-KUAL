@@ -18,11 +18,19 @@ extension/localsend/logs/
 **/state/status.json
 **/state/daemon.pid
 **/state/daemon.lock
+**/state/pending-install.json
+**/state/install.lock
 *.crt
 *.key
 *.pem
 *.p12
 *.pfx
+
+# ZIP installer transaction data
+.localsend-install-backup/
+.localsend-install-stage/
+*.localsend-install-*.part
+*.localsend-rollback-*.part
 
 # Transfer/runtime leftovers
 *.localsend-part
