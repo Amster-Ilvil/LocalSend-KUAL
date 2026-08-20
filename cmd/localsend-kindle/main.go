@@ -15,7 +15,7 @@ import (
 	"localsend-kual/internal/app"
 )
 
-const version = "0.1.8"
+const version = "0.1.9"
 
 func common(fs *flag.FlagSet) *string {
 	return fs.String("root", "/mnt/us/extensions/localsend", "extension root")
@@ -35,7 +35,7 @@ func load(root string) (app.Config, *app.Identity, *app.StateStore, error) {
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "usage: localsend-kindle <serve|send|status|menu|peers|selftest|firewall-cleanup|version>")
+		fmt.Fprintln(os.Stderr, "usage: localsend-kindle <serve|send|status|menu|peers|selftest|install-zip|firewall-cleanup|version>")
 		os.Exit(2)
 	}
 	switch os.Args[1] {
@@ -53,6 +53,8 @@ func main() {
 		peers(os.Args[2:])
 	case "selftest":
 		selftest(os.Args[2:])
+	case "install-zip":
+		installZip(os.Args[2:])
 	case "firewall-cleanup":
 		firewallCleanup(os.Args[2:])
 	default:
@@ -100,7 +102,7 @@ func serve(args []string) {
 	} else if removed > 0 {
 		logger.Printf("partial cleanup removed %d stale file(s)", removed)
 	}
-	logger.Printf("LocalSend-KUAL stability wrapper v0.1.8 active; frozen dual-platform transfer core=v0.1.7")
+	logger.Printf("LocalSend-KUAL stability wrapper v0.1.9 active; frozen dual-platform transfer core=v0.1.7")
 	s := app.NewServer(*root, cfg, id, state, logger)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -184,7 +186,11 @@ func menu(args []string) {
 	if path == "" {
 		path = filepath.Join(*root, "menu.json")
 	}
-	if err := app.WriteKUALMenu(path, state.Peers()); err != nil {
+	installZIPs, err := app.ListInstallZIPs("/mnt/us/documents", 6)
+	if err != nil {
+		installZIPs = nil
+	}
+	if err := app.WriteKUALMenuWithInstalls(path, state.Peers(), installZIPs); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -212,6 +218,76 @@ func selftest(args []string) {
 	if !result.OK {
 		os.Exit(1)
 	}
+}
+
+func installZip(args []string) {
+	fs := flag.NewFlagSet("install-zip", flag.ExitOnError)
+	root := common(fs)
+	receiveDir := fs.String("receive-dir", "/mnt/us/documents", "directory containing received ZIP files")
+	destRoot := fs.String("dest-root", "/mnt/us", "Kindle USB root destination")
+	list := fs.Bool("list", false, "list installable ZIP files")
+	selectToken := fs.String("select", "", "select ZIP token for later confirmation")
+	confirm := fs.Bool("confirm", false, "install the previously selected ZIP")
+	cancel := fs.Bool("cancel", false, "cancel the pending ZIP selection")
+	pending := fs.Bool("pending", false, "show the pending ZIP selection")
+	fs.Parse(args)
+
+	actions := 0
+	for _, active := range []bool{*list, *selectToken != "", *confirm, *cancel, *pending} {
+		if active {
+			actions++
+		}
+	}
+	if actions != 1 {
+		log.Fatal("install-zip requires exactly one of --list, --select, --confirm, --cancel, or --pending")
+	}
+
+	if *list {
+		candidates, err := app.ListInstallZIPs(*receiveDir, 20)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, c := range candidates {
+			fmt.Printf("%s\t%d\t%s\n", c.Token, c.Size, c.Name)
+		}
+		return
+	}
+	if *selectToken != "" {
+		c, err := app.SelectInstallZIP(*root, *receiveDir, *selectToken)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("selected=%s\nsize=%d\nsha256=%s\n", c.Name, c.Size, c.SHA256)
+		return
+	}
+	if *cancel {
+		if err := app.CancelInstallZIP(*root); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("pending install cancelled")
+		return
+	}
+	if *pending {
+		c, err := app.PendingInstallZIP(*root, *receiveDir)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("selected=%s\nsize=%d\nsha256=%s\n", c.Name, c.Size, c.SHA256)
+		return
+	}
+
+	_ = os.MkdirAll(filepath.Join(*root, "logs"), 0o755)
+	lf, err := app.OpenRotatingLog(filepath.Join(*root, "logs", "localsend.log"), app.DefaultLogMaxBytes)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer lf.Close()
+	logger := log.New(lf, "", log.LstdFlags)
+	result, err := app.ConfirmInstallZIP(*root, *receiveDir, *destRoot, logger)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("installed=%s\nfiles=%d\ndirs=%d\nbytes=%d\nreplaced=%d\ncreated=%d\n", result.ArchiveName, result.Files, result.Directories, result.Bytes, result.Replaced, result.Created)
 }
 
 func firewallCleanup(args []string) {
