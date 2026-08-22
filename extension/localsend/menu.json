@@ -26,23 +26,16 @@
         {
           "action": "./bin/kual.sh",
           "exitmenu": false,
-          "name": "接收 30 分钟",
-          "params": "start 30",
-          "priority": 4
-        },
-        {
-          "action": "./bin/kual.sh",
-          "exitmenu": false,
           "name": "停止 LocalSend",
           "params": "stop",
-          "priority": 5
+          "priority": 4
         },
         {
           "action": "./bin/kual.sh",
           "exitmenu": false,
           "name": "发现 / 刷新设备",
           "params": "refresh",
-          "priority": 6,
+          "priority": 5,
           "refresh": true
         },
         {
@@ -57,7 +50,7 @@
             }
           ],
           "name": "发送 Outbox",
-          "priority": 7
+          "priority": 6
         },
         {
           "items": [
@@ -66,7 +59,7 @@
               "exitmenu": false,
               "name": "刷新 ZIP 列表",
               "params": "install-refresh",
-              "priority": 1,
+              "priority": 2,
               "refresh": true
             },
             {
@@ -74,40 +67,47 @@
               "exitmenu": false,
               "name": "暂无 ZIP（发送后点刷新）",
               "params": "install-refresh",
-              "priority": 2,
+              "priority": 3,
               "refresh": true
             },
             {
               "action": "./bin/kual.sh",
               "exitmenu": false,
-              "name": "确认安装已选 ZIP",
-              "params": "install-confirm",
+              "name": "确认直写安装（保留 ZIP）",
+              "params": "install-confirm keep",
               "priority": 20
+            },
+            {
+              "action": "./bin/kual.sh",
+              "exitmenu": false,
+              "name": "确认直写安装并删除 ZIP",
+              "params": "install-confirm delete",
+              "priority": 21
             },
             {
               "action": "./bin/kual.sh",
               "exitmenu": false,
               "name": "取消待安装 ZIP",
               "params": "install-cancel",
-              "priority": 21
+              "priority": 22
             }
           ],
-          "name": "安装 ZIP 到 Kindle 根目录",
-          "priority": 8
+          "name": "低空间安装 ZIP 到 Kindle 根目录",
+          "priority": 7
         },
         {
           "action": "./bin/kual.sh",
           "exitmenu": false,
           "name": "网络诊断",
           "params": "diagnose",
-          "priority": 9
+          "priority": 8
         },
         {
           "action": "./bin/kual.sh",
           "exitmenu": false,
           "name": "使用说明",
           "params": "help",
-          "priority": 10
+          "priority": 9
         }
       ],
       "name": "LocalSend",

@@ -2,8 +2,8 @@
 
 面向 **Kindle Voyage + KUAL** 的轻量 LocalSend 兼容实现，让旧 Kindle 可以在局域网内与 **Windows、macOS、iOS / iPadOS** 等 LocalSend 客户端互传文件，而不需要在 Kindle 上运行 Flutter 图形界面。
 
-> 当前版本：**v0.1.9**  
-> 已经实机验证成功的 Windows/macOS 传输核心仍保持 **v0.1.7 字节级冻结**；v0.1.8/v0.1.9 只增加外围稳定性和工具能力。
+> 当前版本：**v0.1.18**
+> 本次发布包为 Voyage ARMv7 的 v0.1.18 构建；传输核心与外围稳定性、ZIP 安装和结果提示功能均已审计。
 
 ## 功能
 
@@ -78,7 +78,7 @@ extensions/
 
 ## “停止 LocalSend”会做什么
 
-v0.1.9 不会只删除 PID 或修改菜单状态。
+v0.1.18 不会只删除 PID 或修改菜单状态。
 
 停止流程：
 
@@ -95,7 +95,7 @@ v0.1.9 不会只删除 PID 或修改菜单状态。
 
 ## 通过 LocalSend 安装 ZIP 更新包
 
-v0.1.9 新增了一个独立的安全安装器。它**没有修改已冻结的 Windows/macOS 传输核心**。
+v0.1.18 延续并强化了独立的安全安装器。它**没有修改已冻结的 Windows/macOS 传输核心**。
 
 这里的“Kindle 根目录”只表示 Kindle USB 用户分区：
 
@@ -230,7 +230,7 @@ CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 \
 - TLS / HTTP 设备身份；
 - 协议核心类型。
 
-v0.1.9 的 ZIP 安装器、KUAL 停止复核和菜单功能都位于冻结核心之外。
+v0.1.18 的 ZIP 安装器、KUAL 停止复核和菜单功能都位于冻结核心之外。
 
 ## 与 LocalSend 的关系
 
