@@ -25,6 +25,10 @@ extension/localsend/logs/
 *.pem
 *.p12
 *.pfx
+*.p8
+*.der
+*.jks
+*.keystore
 
 # ZIP installer transaction data
 .localsend-install-backup/
@@ -37,10 +41,21 @@ extension/localsend/logs/
 *.localsend-part-*
 *.log
 *.log.1
+*.db
+*.sqlite
+*.sqlite3
+*.sqlite-*
 
-# Local secrets / editor files
+# Local secrets / credentials / editor files
 .env
 .env.*
+!.env.example
+!.env.sample
+!.env.template
+credentials*.json
+secrets*.json
+service-account*.json
+*.ovpn
 .DS_Store
 .idea/
 .vscode/
